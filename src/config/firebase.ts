@@ -1,7 +1,8 @@
-import { initializeApp } from "firebase/app";
+// lib/firebase/config.ts
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,18 +24,35 @@ const requiredEnvVars = [
   'VITE_FIREBASE_APP_ID',
 ];
 
-requiredEnvVars.forEach((varName) => {
-  if (!import.meta.env[varName]) {
-    console.warn(`Missing environment variable: ${varName}`);
-  }
-});
+const missingEnvVars = requiredEnvVars.filter(
+  (varName) => !import.meta.env[varName]
+);
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing Firebase environment variables:', missingEnvVars);
+  throw new Error(
+    `Missing required Firebase configuration: ${missingEnvVars.join(', ')}`
+  );
+}
+
+// Initialize Firebase (avoid double initialization)
+let app:any
+try {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+    console.log('✅ Firebase initialized successfully');
+  } else {
+    app = getApp();
+    console.log('✅ Using existing Firebase instance');
+  }
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error);
+  throw error;
+}
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-
-// Only initialize analytics in browser environment
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-
-export default app;
+export const analytics = typeof window !== 'undefined' 
+  ? isSupported().then(yes => yes ? getAnalytics(app) : null)
+  : null;
+export { app };
