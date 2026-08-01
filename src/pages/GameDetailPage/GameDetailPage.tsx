@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Box, Button, Typography, CircularProgress } from '@mui/material';
+import { Container, Button, Typography, CircularProgress } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useGames } from '../../hooks/useGames';
 import GameDetail from '../../components/GameDetail/GameDetail';
 
 const GameDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { getGame, loading, incrementDownloads } = useGames();
+const { getGame, loading } = useGames();
   const [game, setGame] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Grid, Typography, Box, Alert, Snackbar } from '@mui/material';
+import { Container, Grid, Typography, Alert, Snackbar } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { useGames } from '../../hooks/useGames';
 import LoginForm from '../LoginForm/LoginForm';

@@ -14,7 +14,7 @@ import {
   CircularProgress,
   InputAdornment,
 } from '@mui/material';
-import { Add, Delete, CloudDownload } from '@mui/icons-material';
+import { Add, CloudDownload } from '@mui/icons-material';
 import type { Game } from '../../types';
 import ImageUpload from '../ImageUpload/ImageUpload';
 

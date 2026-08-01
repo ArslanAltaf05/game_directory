@@ -26,7 +26,7 @@ export interface Game {
   isFeatured: boolean;
   version?: string;
   fileSize?: string;
-  downloads?: number;
+  downloads: number;
   packageName?: string;
   platforms?: string[];
   socialLinks?: SocialLink[];
@@ -40,4 +40,7 @@ export interface Game {
     oneStar: number;
   };
   downloadUrl?: string; // New field for APK download URL
+    createdAt?: string; // ✅ Add this optional field
+  updatedAt?: string; // ✅ Add this optional field
+
 }

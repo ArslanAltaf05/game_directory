@@ -33,13 +33,7 @@ const DownloadProgress: React.FC<DownloadProgressProps> = ({
 }) => {
   if (!open) return null;
 
-  const getStatusColor = () => {
-    switch (status) {
-      case 'complete': return 'success.main';
-      case 'error': return 'error.main';
-      default: return 'primary.main';
-    }
-  };
+  
 
   const getStatusIcon = () => {
     switch (status) {

@@ -12,7 +12,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAdmin, setIsAdmin] = useState(false);
 
   const login = (username: string, password: string) => {
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'maisrakhan575@gmail.com' && password === 'maisrakhan123') {
       setIsAdmin(true);
       return true;
     }

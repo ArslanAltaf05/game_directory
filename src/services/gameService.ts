@@ -10,6 +10,7 @@ import {
   orderBy,
   where,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Game, UserReview } from '../types';
@@ -18,6 +19,29 @@ const COLLECTION_NAME = 'games';
 
 // Convert Firestore data to Game type
 const convertToGame = (docData: any, id: string): Game => {
+  // Helper function to safely convert timestamp
+  const safeConvertTimestamp = (timestamp: any): string => {
+    if (!timestamp) return new Date().toISOString();
+    
+    if (timestamp instanceof Timestamp) {
+      return timestamp.toDate().toISOString();
+    }
+    
+    if (typeof timestamp === 'object' && 'toDate' in timestamp) {
+      try {
+        return timestamp.toDate().toISOString();
+      } catch (e) {
+        return new Date().toISOString();
+      }
+    }
+    
+    if (typeof timestamp === 'string') {
+      return timestamp;
+    }
+    
+    return new Date().toISOString();
+  };
+
   return {
     id,
     title: docData.title || '',
@@ -44,9 +68,9 @@ const convertToGame = (docData: any, id: string): Game => {
       twoStar: 0,
       oneStar: 0,
     },
-    downloadUrl: docData.downloadUrl || '', // Add this field
-    createdAt: docData.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-    updatedAt: docData.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    downloadUrl: docData.downloadUrl || '',
+    createdAt: safeConvertTimestamp(docData.createdAt),
+    updatedAt: safeConvertTimestamp(docData.updatedAt),
   };
 };
 
@@ -105,11 +129,10 @@ export const getGameById = async (id: string): Promise<Game | null> => {
 };
 
 // Add new game
-export const addGame = async (gameData: Omit<Game, 'id'>): Promise<string> => {
+export const addGame = async (gameData: Omit<Game, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
   try {
     const gamesRef = collection(db, COLLECTION_NAME);
     
-    // Ensure all fields are properly formatted
     const docData = {
       title: gameData.title || '',
       description: gameData.description || '',
@@ -135,7 +158,7 @@ export const addGame = async (gameData: Omit<Game, 'id'>): Promise<string> => {
         twoStar: 0,
         oneStar: 0,
       },
-      downloadUrl: gameData.downloadUrl || '', // Add this field
+      downloadUrl: gameData.downloadUrl || '',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -156,20 +179,22 @@ export const updateGame = async (id: string, gameData: Partial<Game>): Promise<v
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
     
-    // Ensure downloadUrl is included in the update
-    const updateData: any = {
-      ...gameData,
+    // Remove id, createdAt, updatedAt from update data
+    const { id: _, createdAt: __, updatedAt: ___, ...updateData } = gameData;
+    
+    const dataToUpdate = {
+      ...updateData,
       updatedAt: serverTimestamp(),
     };
     
     // Explicitly handle downloadUrl
     if (gameData.downloadUrl !== undefined) {
-      updateData.downloadUrl = gameData.downloadUrl;
+      dataToUpdate.downloadUrl = gameData.downloadUrl;
     }
     
-    console.log('Updating game in Firestore:', id, updateData);
+    console.log('Updating game in Firestore:', id, dataToUpdate);
     
-    await updateDoc(docRef, updateData);
+    await updateDoc(docRef, dataToUpdate);
     console.log('Game updated successfully');
   } catch (error) {
     console.error('Error updating game:', error);
@@ -260,3 +285,61 @@ export const incrementDownloads = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+// Get games by category
+export const getGamesByCategory = async (category: string): Promise<Game[]> => {
+  try {
+    const gamesRef = collection(db, COLLECTION_NAME);
+    const q = query(gamesRef, where('category', '==', category));
+    const querySnapshot = await getDocs(q);
+    
+    const games: Game[] = [];
+    querySnapshot.forEach((doc) => {
+      games.push(convertToGame(doc.data(), doc.id));
+    });
+    
+    return games;
+  } catch (error) {
+    console.error('Error fetching games by category:', error);
+    throw error;
+  }
+};
+
+// Get top rated games
+export const getTopRatedGames = async (limitCount: number = 10): Promise<Game[]> => {
+  try {
+    const allGames = await getAllGames();
+    return allGames
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, limitCount);
+  } catch (error) {
+    console.error('Error fetching top rated games:', error);
+    throw error;
+  }
+};
+
+// Get most downloaded games
+export const getMostDownloadedGames = async (limitCount: number = 10): Promise<Game[]> => {
+  try {
+    const allGames = await getAllGames();
+    return allGames
+      .sort((a, b) => b.downloads - a.downloads)
+      .slice(0, limitCount);
+  } catch (error) {
+    console.error('Error fetching most downloaded games:', error);
+    throw error;
+  }
+};
+
+// Get games by platform
+export const getGamesByPlatform = async (platform: string): Promise<Game[]> => {
+  try {
+    const allGames = await getAllGames();
+    return allGames.filter(game => 
+      game.platforms && game.platforms.includes(platform)
+    );
+  } catch (error) {
+    console.error('Error fetching games by platform:', error);
+    throw error;
+  }
+};  

@@ -31,13 +31,8 @@ import {
   LinkedIn,
   Email,
   WhatsApp,
-  Favorite,
-  FavoriteBorder,
-  Share,
-  Download,
   Android,
   Apple,
-  Close,
   ThumbUp,
   ThumbDown,
   Star,
@@ -49,6 +44,8 @@ import {
   OpenInNew,
   CloudDownload,
 } from '@mui/icons-material';
+import { Download, Share, Favorite, FavoriteBorder } from '@mui/icons-material';
+
 import type { Game } from '../../types';
 import { useGames } from '../../hooks/useGames';
 

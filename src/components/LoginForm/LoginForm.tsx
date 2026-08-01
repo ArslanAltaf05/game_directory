@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  Box,
-} from '@mui/material';
+
+import { Button,  Paper, TextField, Typography, Alert } from '@mui/material';
+
 import { useAuth } from '../../context/AuthContext';
 
 const LoginForm: React.FC = () => {
@@ -61,9 +56,7 @@ const LoginForm: React.FC = () => {
         >
           Login
         </Button>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block', textAlign: 'center' }}>
-          Demo: admin / admin123
-        </Typography>
+        
       </form>
     </Paper>
   );

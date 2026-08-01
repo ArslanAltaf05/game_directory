@@ -9,7 +9,6 @@ import {
   Chip,
   Rating,
   CardActionArea,
-  useTheme,
 } from '@mui/material';
 import { Game } from '../../types';
 
@@ -18,7 +17,6 @@ interface GameCardProps {
 }
 
 const GameCard: React.FC<GameCardProps> = ({ game }) => {
-  const theme = useTheme();
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
